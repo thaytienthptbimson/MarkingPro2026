@@ -3,134 +3,177 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Quét phiếu trắc nghiệm THPT 2026</title>
+<title>Chấm phiếu trắc nghiệm THPT 2026</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;600;800&display=swap">
 <style>
-  :root { --ink:#14213d; --paper:#f6f7f9; --line:#d5d9e0; --ok:#15803d; --bad:#b91c1c; }
-  * { box-sizing:border-box; }
-  body { margin:0; font:16px/1.5 system-ui, sans-serif; background:var(--paper); color:var(--ink);
-         padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom); }
-  main { max-width:640px; margin:0 auto; padding:12px; }
-  h1 { font-size:1.15rem; margin:4px 0 10px; }
-  h2 { font-size:1rem; margin:0 0 8px; }
-  .cam { position:relative; background:#000; border-radius:8px; overflow:hidden; aspect-ratio:3/4; }
-  video { width:100%; height:100%; object-fit:cover; display:block; }
-  .guide { position:absolute; inset:6%; border:2px dashed rgba(255,255,255,.6); border-radius:6px; pointer-events:none; }
-  .row { display:flex; gap:8px; margin:10px 0; }
-  button, .file { flex:1; padding:12px; border:0; border-radius:8px; background:var(--ink); color:#fff;
-                  font-size:1rem; font-weight:600; text-align:center; cursor:pointer; }
-  button:disabled { opacity:.4; cursor:not-allowed; }
-  button.alt, .file { background:#fff; color:var(--ink); border:1px solid var(--line); }
-  .file input { display:none; }
+  :root { --ink:#14213d; --paper:#f2f3f6; --line:#d9dde5; --mute:#5b6577; --hl:#ffd84d; --ok:#15803d; --bad:#b91c1c; }
+  * { box-sizing:border-box; } [hidden] { display:none!important; }
+  body { margin:0; font:15px/1.5 "Be Vietnam Pro", system-ui, sans-serif; background:var(--paper); color:var(--ink);
+         padding:0 0 calc(76px + env(safe-area-inset-bottom)); font-variant-numeric:tabular-nums; }
+  main { max-width:640px; margin:0 auto; padding:0 12px; }
+  small { color:var(--mute); font-size:.8rem; }
+  .top { position:sticky; top:0; z-index:5; background:var(--paper); padding:calc(8px + env(safe-area-inset-top)) 12px 8px; }
+  .top > div { max-width:640px; margin:0 auto; display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; }
+  .brand { display:flex; align-items:center; gap:10px; } h1 { font-size:1.05rem; font-weight:800; margin:0; }
+  .dots { display:flex; gap:3px; } .dots i { width:11px; height:11px; border:2px solid var(--ink); border-radius:50%; }
+  .dots i.f { background:var(--ink); }
+  #ctx { flex:none; background:#fff; color:var(--ink); border:1px solid var(--line); padding:6px 10px; font-size:.82rem; font-weight:400; }
+  #ctx em { font-style:normal; font-weight:600; } em.ok { color:var(--ok); } em.bad { color:var(--bad); }
+  .card { background:#fff; border:1px solid var(--line); border-radius:12px; padding:4px 14px 14px; margin-bottom:12px; }
+  fieldset { border:0; border-bottom:1px solid var(--line); margin:0; padding:12px 0; min-width:0; } fieldset:last-child { border:0; }
+  legend { padding:0; font-weight:800; display:flex; gap:8px; align-items:center; margin-bottom:8px; float:left; width:100%; } legend + * { clear:both; }
+  .badge { font-size:.75rem; font-weight:600; padding:1px 8px; border-radius:99px; background:var(--paper); color:var(--mute); }
+  .badge.ok { background:#dcfce7; color:var(--ok); } .badge.bad { background:#fee2e2; color:var(--bad); }
+  .opts { display:grid; gap:8px; } .chips { grid-template-columns:repeat(auto-fill,minmax(125px,1fr)); }
+  .opt { position:relative; display:flex; gap:10px; align-items:center; padding:9px 12px; border:1.5px solid var(--line); border-radius:10px; background:#fff; cursor:pointer; }
+  .opt input { position:absolute; inset:0; opacity:0; margin:0; cursor:pointer; }
+  .opt i { flex:none; width:18px; height:18px; border:2px solid var(--ink); border-radius:50%; }
+  .opt:has(input:checked) { border-color:var(--ink); background:#eef0f6; }
+  .opt input:checked + i { background:var(--ink); box-shadow:inset 0 0 0 3px #fff; }
+  .opt:has(input:focus-visible) { outline:3px solid #2563eb; outline-offset:2px; }
+  .opt span { line-height:1.3; font-weight:600; } .opt small { display:block; font-weight:400; }
+  label { display:block; margin-bottom:8px; } .lb { display:flex; justify-content:space-between; font-size:.85rem; color:var(--mute); }
+  .cn { font-weight:600; font-size:.8rem; } .cn.ok { color:var(--ok); } .cn.bad { color:var(--bad); }
+  input[type=text], input:not([type]), select, textarea { display:block; width:100%; margin-top:2px; padding:10px; font:inherit; color:var(--ink); background:#fff; border:1px solid var(--line); border-radius:8px; }
+  textarea { min-height:84px; } .g { display:grid; grid-template-columns:1fr 1fr; gap:0 8px; } .g .w { grid-column:1/-1; }
+  button, .file { flex:1; padding:12px; border:0; border-radius:8px; background:var(--ink); color:#fff; font:inherit; font-weight:600; text-align:center; cursor:pointer; }
+  button:disabled { opacity:.4; cursor:not-allowed; } button.alt, .file { background:#fff; color:var(--ink); border:1px solid var(--line); }
+  .file input { display:none; } .row { display:flex; gap:8px; margin:10px 0; }
   button:focus-visible, .file:focus-within, input:focus-visible, select:focus-visible, textarea:focus-visible, summary:focus-visible { outline:3px solid #2563eb; outline-offset:2px; }
-  #status, #msg { min-height:1.5em; font-size:.95rem; }
-  #status.err, #msg.err { color:var(--bad); } #status.ok, #msg.ok { color:var(--ok); }
-  canvas#out { width:100%; height:auto; border:1px solid var(--line); border-radius:8px; background:#fff; }
+  .cam { position:relative; background:#000; border-radius:12px; overflow:hidden; aspect-ratio:3/4; }
+  video { width:100%; height:100%; object-fit:cover; display:block; }
+  canvas#out { width:100%; height:100%; object-fit:cover; display:block; background:#fff; position: absolute; top: 0; left: 0; }
+  .guide { position:absolute; inset:6%; border:2px dashed rgba(255,255,255,.6); border-radius:6px; pointer-events:none; z-index: 2; }
+  #status { min-height:1.5em; font-size:.9rem; } #status.err { color:var(--bad); } #status.ok { color:var(--ok); }
   pre { background:#fff; border:1px solid var(--line); border-radius:8px; padding:10px; overflow-x:auto; font-size:.85rem; white-space:pre-wrap; }
-  small { color:#5b6577; }
-  .panel { background:#fff; border:1px solid var(--line); border-radius:8px; padding:12px; margin:0 0 12px; }
-  .g { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
-  .g .w { grid-column:1/-1; }
-  label { display:block; font-size:.85rem; color:#5b6577; }
-  input, select, textarea { display:block; width:100%; margin-top:2px; padding:10px; font:inherit; color:var(--ink);
-                            background:#fff; border:1px solid var(--line); border-radius:8px; }
-  textarea { min-height:90px; }
-  details { margin-top:10px; } summary { cursor:pointer; font-weight:600; }
-  .tw { overflow-x:auto; } table { width:100%; border-collapse:collapse; font-size:.9rem; }
-  th, td { padding:6px 8px; border-bottom:1px solid var(--line); text-align:left; white-space:nowrap; }
-  td.n, th.n { text-align:right; } td button { padding:4px 8px; font-size:.85rem; flex:none; }
+  #hs { margin-top:14px; } #hs h2, .card h2 { font-size:1rem; font-weight:800; margin:12px 0 4px; } details { margin:6px 0; } summary { cursor:pointer; font-weight:600; padding:4px 0; }
+  #kqBox { display:flex; align-items:center; gap:12px; background:var(--ink); color:#fff; border-radius:10px; padding:10px 14px; margin-top:8px; }
+  #kqBox small { color:#c5cbe0; } #kqBox > div:nth-child(2) { flex:1; } #kqBox button { flex:none; padding:6px 10px; }
+  .big { font-size:2.2rem; font-weight:800; line-height:1; color:var(--ink); background:var(--hl); border-radius:10px; padding:8px 10px; } .big small { color:var(--ink); }
+  .stats { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin:8px 0; text-align:center; }
+  .stats div { background:var(--paper); border-radius:10px; padding:8px 4px; } .stats b { display:block; font-size:1.25rem; font-weight:800; }
+  .hist { display:flex; gap:4px; align-items:flex-end; height:100px; border-bottom:1px solid var(--ink); }
+  .hist div { flex:1; display:flex; flex-direction:column; justify-content:flex-end; align-items:center; font-size:.7rem; }
+  .hist span { width:100%; background:var(--ink); border-radius:3px 3px 0 0; } .hist em { font-style:normal; color:var(--mute); }
+  .axis { display:flex; gap:4px; } .axis small { flex:1; text-align:center; font-size:.7rem; }
+  .f2 { display:grid; grid-template-columns:1fr 1.4fr; gap:8px; margin:12px 0 8px; } .f2 select, .f2 input { margin:0; }
+  .tw { overflow-x:auto; } table { width:100%; border-collapse:collapse; font-size:.88rem; }
+  th, td { padding:7px 6px; border-bottom:1px solid var(--line); text-align:left; white-space:nowrap; } th { font-size:.78rem; color:var(--mute); font-weight:600; }
+  td small { display:block; } .n { text-align:right; } .empty { white-space:normal; color:var(--mute); text-align:center; padding:18px 6px; }
+  .sc { display:inline-block; min-width:2.6em; text-align:center; font-weight:800; padding:1px 6px; border-radius:6px; background:var(--paper); }
+  .sc.hi { background:#dcfce7; color:var(--ok); } .sc.lo { background:#fee2e2; color:var(--bad); }
+  td button { flex:none; padding:2px 9px; font-size:1.1rem; background:none; color:var(--mute); border:0; }
+  .nav { position:fixed; bottom:0; left:50%; transform:translateX(-50%); width:100%; max-width:640px; display:flex; background:#fff; border-top:1px solid var(--line); padding-bottom:env(safe-area-inset-bottom); z-index:6; }
+  .nav button { background:none; color:var(--mute); border-radius:0; padding:14px 4px; display:flex; gap:8px; justify-content:center; align-items:center; }
+  .nav button::before { content:""; width:14px; height:14px; border:2px solid currentColor; border-radius:50%; }
+  .nav button[aria-selected=true] { color:var(--ink); box-shadow:inset 0 3px 0 var(--hl); } .nav button[aria-selected=true]::before { background:var(--ink); }
+  .nav b { font-size:.72rem; background:var(--hl); color:var(--ink); border-radius:99px; padding:0 7px; } .nav b:empty { display:none; }
+  #msg { position:fixed; left:50%; bottom:calc(70px + env(safe-area-inset-bottom)); transform:translateX(-50%); max-width:calc(100% - 24px); background:var(--ink); color:#fff; padding:10px 16px; border-radius:10px; font-weight:600; opacity:0; pointer-events:none; transition:opacity .2s; z-index:9; }
+  #msg.show { opacity:1; } #msg.err { background:var(--bad); }
+  @media (prefers-reduced-motion:reduce) { * { transition:none!important; } }
 </style>
 </head>
 <body>
+<header class="top"><div>
+  <div class="brand"><span class="dots" aria-hidden="true"><i></i><i></i><i class="f"></i><i></i></span><h1>Chấm phiếu THPT 2026</h1></div>
+  <button id="ctx" type="button" title="Mở phần cài đặt"></button>
+</div></header>
+
 <main>
-  <h1>Quét phiếu trả lời trắc nghiệm THPT 2026</h1>
-
-  <section class="panel" aria-label="Cài đặt bài chấm">
-    <h2>Cài đặt bài chấm</h2>
-    <div class="g">
-      <label class="w">Mẫu phiếu <select id="selMau"></select></label>
-      <label>Môn thi <select id="selMon"></select></label>
-      <label>Mã đề <input id="inMa" placeholder="vd: 101" autocomplete="off"></label>
+<!-- ============ CÀI ĐẶT ============ -->
+<section id="t-cai" class="tab card">
+  <fieldset><legend>1. Mẫu phiếu</legend><div id="mauBox" class="opts"></div></fieldset>
+  <fieldset><legend>2. Môn thi</legend><div id="monBox" class="opts chips"></div>
+    <small>Số dưới tên môn là số câu phần I · II · III.</small></fieldset>
+  <fieldset><legend>3. Mã đề</legend>
+    <label><input id="inMa" placeholder="vd: 101" autocomplete="off" inputmode="numeric"></label></fieldset>
+  <fieldset><legend>4. Đáp án đúng <span id="keyState" class="badge"></span></legend>
+    <label id="rk1"><span class="lb">Phần I: một đáp án mỗi câu <b class="cn" id="hk1"></b></span><input id="kP1" placeholder="ABCDABCD…" autocomplete="off"></label>
+    <label id="rk2"><span class="lb">Phần II: 4 ký tự Đ/S mỗi câu, cách nhau <b class="cn" id="hk2"></b></span><input id="kP2" placeholder="ĐSĐS SSĐĐ…" autocomplete="off"></label>
+    <label id="rk3"><span class="lb">Phần III: cách nhau, dùng phẩy thập phân <b class="cn" id="hk3"></b></span><input id="kP3" placeholder="12,5 -3 0,75…" autocomplete="off"></label>
+    <div class="row"><button id="btnKey" type="button">Lưu đáp án</button></div></fieldset>
+  <fieldset><legend>5. Danh sách lớp <span id="rosterN" class="badge"></span></legend>
+    <div class="row" style="margin-top:0; margin-bottom:8px">
+      <button id="btnXlsMau" type="button" class="alt" style="padding:8px">Tải Excel mẫu</button>
+      <label class="file" style="padding:8px; margin:0">Nhập Excel<input id="fileXlsIn" type="file" accept=".xlsx, .xls"></label>
     </div>
-    <details id="keyBox" open>
-      <summary>Đáp án đúng: <span id="keyState">chưa nhập</span></summary>
-      <div class="g">
-        <label class="w">Phần I (không cách, vd: ABCD…) <input id="kP1" autocomplete="off"></label>
-        <label class="w">Phần II (4 ký tự Đ/S mỗi câu, cách nhau, vd: ĐSĐS SSĐĐ) <input id="kP2" autocomplete="off"></label>
-        <label class="w">Phần III (cách nhau, vd: 12,5 -3 0,75) <input id="kP3" autocomplete="off"></label>
-      </div>
-      <div class="row"><button id="btnKey" type="button">Lưu đáp án</button></div>
-    </details>
-    <details>
-      <summary>Danh sách lớp (tự điền họ tên theo SBD)</summary>
-      <label>Mỗi dòng một học sinh: SBD, Họ và tên, Lớp (ngăn bằng tab hoặc dấu phẩy)
-        <textarea id="roster" placeholder="0101001, Nguyễn Văn An, 12A1"></textarea></label>
-    </details>
-  </section>
+    <label><span class="lb">Dán text hoặc nhập từ file Excel (SBD, Họ tên, Lớp).</span>
+    <textarea id="roster" placeholder="0101001	Nguyễn Văn An	12A1"></textarea></label>
+  </fieldset>
+</section>
 
+<!-- ============ QUÉT ============ -->
+<section id="t-quet" class="tab" hidden>
   <div class="cam">
     <video id="video" playsinline muted></video>
-    <div class="guide"></div>
+    <canvas id="out" hidden></canvas>
+    <div class="guide" id="guide-box"></div>
   </div>
-
   <div class="row">
     <button id="btnStart">Bật camera</button>
     <button id="btnScan" disabled>Chụp và chấm</button>
   </div>
+  <div class="row"><button id="btnResumeCam" class="alt" hidden>Quét tiếp bài khác</button></div>
   <div class="row">
-    <label class="file">Chọn ảnh có sẵn<input id="file" type="file" accept="image/*"></label>
+    <!-- Nút tải ảnh có sẵn từ máy -->
+    <label class="file" style="margin:0">Chọn ảnh có sẵn<input id="file" type="file" accept="image/*"></label>
   </div>
+  <div id="status" role="status" aria-live="polite">Đang chờ hệ thống...</div>
 
-  <div id="status" role="status" aria-live="polite">Đang tải OpenCV.js…</div>
-
-  <!-- Canvas ẩn: khung hình chụp từ video được vẽ vào đây để OpenCV đọc (cv.imread) -->
   <canvas id="cap" hidden></canvas>
-
-  <!-- Canvas hiển thị phiếu đã nắn phẳng + vòng tròn ROI: dùng để tinh chỉnh tọa độ -->
-  <canvas id="out" hidden></canvas>
   <pre id="result" hidden></pre>
-  <small>Đặt cả tờ phiếu trong khung nét đứt, nền tối, đủ sáng, giữ máy thẳng. Vòng xanh = ô được nhận là đã tô; vòng đỏ = ô trống.</small>
+  <small>Đặt cả tờ phiếu trong khung nét đứt, đủ sáng. Vòng xanh = ô được nhận là đã tô; vòng đỏ = ô trống.</small>
 
-  <section class="panel" style="margin-top:12px" aria-label="Thí sinh và bài làm">
-    <h2>Thí sinh và bài làm</h2>
+  <section id="hs" class="card">
+    <h2>Thí sinh</h2>
     <div class="g">
-      <label>SBD <input id="inSbd" autocomplete="off"></label>
-      <label>Lớp <input id="inLop" autocomplete="off"></label>
-      <label class="w">Họ và tên <input id="inTen" autocomplete="off"></label>
-      <label class="w">Phần I đã quét <input id="aP1" autocomplete="off"></label>
-      <label class="w">Phần II đã quét <input id="aP2" autocomplete="off"></label>
-      <label class="w">Phần III đã quét <input id="aP3" autocomplete="off"></label>
+      <label>SBD<input id="inSbd" autocomplete="off" inputmode="numeric"></label>
+      <label>Lớp<input id="inLop" autocomplete="off"></label>
+      <label class="w">Họ và tên<input id="inTen" autocomplete="off"></label>
     </div>
-    <small>Dùng “-” cho câu bỏ trống. Có thể sửa kết quả quét hoặc nhập tay trước khi chấm.</small>
-    <div class="row"><button id="btnLuu" type="button">Chấm và lưu</button></div>
-    <div id="msg" role="status" aria-live="polite"></div>
+    <details id="dAns"><summary>Đáp án đã quét (xem hoặc sửa)</summary>
+      <label id="ra1"><span class="lb">Phần I <b class="cn" id="ha1"></b></span><input id="aP1" autocomplete="off"></label>
+      <label id="ra2"><span class="lb">Phần II <b class="cn" id="ha2"></b></span><input id="aP2" autocomplete="off"></label>
+      <label id="ra3"><span class="lb">Phần III <b class="cn" id="ha3"></b></span><input id="aP3" autocomplete="off"></label>
+      <small>Dùng “-” cho câu bỏ trống.</small></details>
+    <div class="row"><button id="btnLuu" type="button">Lưu bài thi</button></div>
+    <div id="kqBox" hidden></div>
   </section>
+</section>
 
-  <section class="panel" aria-label="Bảng điểm">
-    <h2>Bảng điểm (<span id="cnt">0</span> bài)</h2>
-    <div class="tw"><table>
-      <thead><tr><th>SBD</th><th>Họ và tên</th><th>Môn</th><th class="n">Điểm</th><th></th></tr></thead>
-      <tbody id="tb"></tbody>
-    </table></div>
-    <div class="row">
-      <button id="btnXls" type="button">Xuất Excel</button>
-      <button id="btnClr" type="button" class="alt">Xóa bảng điểm</button>
-    </div>
-  </section>
+<!-- ============ ĐIỂM ============ -->
+<section id="t-diem" class="tab card" hidden>
+  <div class="f2"><select id="fMon" aria-label="Lọc theo môn"></select><input id="fQ" type="search" placeholder="Tìm tên hoặc SBD" aria-label="Tìm kiếm"></div>
+  <div class="stats"><div><b id="sN">0</b><small>bài</small></div><div><b id="sAvg">–</b><small>trung bình</small></div><div><b id="sMax">–</b><small>cao nhất</small></div><div><b id="sMin">–</b><small>thấp nhất</small></div></div>
+  <div class="hist" id="hist" role="img" aria-label="Phổ điểm"></div>
+  <div class="axis"><small>0</small><small>1</small><small>2</small><small>3</small><small>4</small><small>5</small><small>6</small><small>7</small><small>8</small><small>9+</small></div>
+  <div class="tw"><table>
+    <thead><tr><th>SBD</th><th>Họ và tên</th><th>Môn</th><th class="n">I</th><th class="n">II</th><th class="n">III</th><th class="n">Tổng</th><th></th></tr></thead>
+    <tbody id="tb"></tbody></table></div>
+  <div class="row"><button id="btnXls" type="button">Xuất Excel</button><button id="btnClr" type="button" class="alt">Xóa bảng điểm</button></div>
+</section>
 </main>
 
+<nav class="nav" role="tablist" aria-label="Chức năng">
+  <button type="button" data-t="cai" role="tab">Cài đặt</button>
+  <button type="button" data-t="quet" role="tab">Quét</button>
+  <button type="button" data-t="diem" role="tab">Điểm <b id="cnt"></b></button>
+</nav>
+<div id="msg" role="status" aria-live="polite"></div>
+
+<!-- Thư viện Excel -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
 <script>
 (() => {
-  const $ = id => document.getElementById(id);
+  const $ = id => document.getElementById(id), Q = s => document.querySelector(s);
   const LS = (k, d) => { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } };
   const SV = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} };
   const esc = s => String(s).replace(/[&<>"]/g, c => '&#' + c.charCodeAt(0) + ';');
 
-  // ===== CẤU HÌNH: sửa tại đây cho khớp phiếu và cấu trúc đề thực tế =====
-  // ph: số phần có trên phiếu. n: [số câu phần I, II, III]. p3: điểm mỗi câu phần III. Phần I: 0,25 điểm/câu.
   const MAU = {
-    a: { ten: 'THPT 2026 – 3 phần (I, II, III)', ph: 3 },
-    b: { ten: 'Chỉ phần I – một lựa chọn A–D', ph: 1 }
+    a: { ten: 'THPT 2026 – 3 phần', mota: 'Phần I, II và III', ph: 3 },
+    b: { ten: 'Chỉ phần I', mota: 'Một lựa chọn A–D (vd: Ngoại ngữ)', ph: 1 }
   };
   const MON = {
     toan: { ten: 'Toán', n: [12, 4, 6], p3: .5 },
@@ -141,39 +184,73 @@
     su:   { ten: 'Lịch sử', n: [24, 4, 0], p3: 0 },
     nn:   { ten: 'Ngoại ngữ', n: [40, 0, 0], p3: 0 }
   };
-  const P2 = [0, .1, .25, .5, 1]; // điểm phần II theo số ý đúng trong câu
-  // =====================================================================
+  const P2 = [0, .1, .25, .5, 1]; 
 
-  let keys = LS('phieu.key', {}), kq = LS('phieu.kq', []);
-  const mon = () => MON[$('selMon').value];
-  const keyId = () => $('selMon').value + '|' + $('inMa').value.trim();
-  const r2 = x => Math.round(x * 100) / 100;
-  const msg = (t, c) => { $('msg').textContent = t; $('msg').className = c || ''; };
+  let keys = LS('phieu.key', {}), kq = LS('phieu.kq', []), lastRec = null, tm;
+  const radio = n => (Q(`input[name="${n}"]:checked`) || {}).value;
+  const mon = () => MON[radio('mon')] || MON['toan'];
+  const keyId = () => radio('mon') + '|' + $('inMa').value.trim();
+  
+  const r2 = x => Math.round(x * 100) / 100, f = x => x.toLocaleString('vi-VN', { maximumFractionDigits: 2 });
+  const msg = (t, c) => { const m = $('msg'); m.textContent = t; m.className = 'show ' + (c || ''); clearTimeout(tm); tm = setTimeout(() => m.className = '', 3500); };
+  const opt = (n, v, t, s, c) => `<label class="opt"><input type="radio" name="${n}" value="${v}"${c ? ' checked' : ''}><i></i><span>${t}${s ? `<small>${s}</small>` : ''}</span></label>`;
 
-  $('selMau').innerHTML = Object.entries(MAU).map(([k, m]) => `<option value="${k}">${m.ten}</option>`).join('');
-  $('selMau').value = LS('phieu.mau', 'a'); $('inMa').value = LS('phieu.ma', '');
-  $('roster').value = LS('phieu.ds', '');
+  const go = t => {
+    document.querySelectorAll('.tab').forEach(s => s.hidden = s.id !== 't-' + t);
+    document.querySelectorAll('.nav button').forEach(b => b.setAttribute('aria-selected', b.dataset.t === t));
+    scrollTo(0, 0);
+  };
+  Q('.nav').onclick = e => { const t = e.target.closest('button'); if (t) go(t.dataset.t); };
+  $('ctx').onclick = () => go('cai');
 
-  function fillMon() {
-    const ph = MAU[$('selMau').value].ph, cur = LS('phieu.mon', 'toan');
-    $('selMon').innerHTML = Object.entries(MON).filter(([, m]) => ph === 3 || m.n[1] + m.n[2] === 0)
-      .map(([k, m]) => `<option value="${k}">${m.ten}</option>`).join('');
-    if ([...$('selMon').options].some(o => o.value === cur)) $('selMon').value = cur;
-    loadKey();
+  function drawMau() {
+    const cur = LS('phieu.mau', 'a');
+    $('mauBox').innerHTML = Object.entries(MAU).map(([k, m]) => opt('mau', k, m.ten, m.mota, k === cur)).join('');
   }
-  function loadKey() {
-    const k = keys[keyId()] || { p1: '', p2: '', p3: '' };
-    $('kP1').value = k.p1; $('kP2').value = k.p2; $('kP3').value = k.p3;
-    $('keyState').textContent = keys[keyId()] ? 'đã lưu' : 'chưa nhập';
+  
+  function drawMon() {
+    const ph = MAU[radio('mau')].ph, cur = LS('phieu.mon', 'toan');
+    const list = Object.entries(MON).filter(([, m]) => ph === 3 || m.n[1] + m.n[2] === 0);
+    const sel = list.some(([k]) => k === cur) ? cur : list[0][0];
+    $('monBox').innerHTML = list.map(([k, m]) => opt('mon', k, m.ten, m.n.filter(x => x).join(' · ') + ' câu', k === sel)).join('');
+    // KHẮC PHỤC LỖI 1: Cập nhật ngay LocalStorage nếu hệ thống tự đổi môn (VD: chuyển mẫu phiếu 3 phần sang 1 phần)
+    SV('phieu.mon', sel);
   }
 
+  // KHẮC PHỤC CRASH: Đảm bảo dữ liệu parse an toàn, loại bỏ các lỗi gọi hàm trên undefined
+  const cnt = (a, b, c) => [String(a||'').replace(/\s/g, '').length, String(b||'').trim() ? String(b||'').trim().split(/[\s,;|]+/).filter(x=>x).length : 0, String(c||'').trim() ? String(c||'').trim().split(/[\s;|]+/).filter(x=>x).length : 0];
   const parse = (a, b, c) => ({
-    p1: a.toUpperCase().replace(/\s/g, ''),
-    p2: b.toUpperCase().replace(/D/g, 'Đ').split(/[\s,;|]+/),
-    p3: c.trim().split(/[\s;|]+/)
+    p1: String(a || '').toUpperCase().replace(/\s/g, ''),
+    p2: String(b || '').toUpperCase().replace(/D/g, 'Đ').split(/[\s,;|]+/).filter(x => x),
+    p3: String(c || '').trim().split(/[\s;|]+/).filter(x => x)
   });
-  const num = x => { x = (x || '').replace(',', '.'); return x === '' || x === '-' ? null : (isNaN(+x) ? x : +x); };
+  
+  function hint(p, r, a, b, c) {
+    const m = mon(), n = cnt(a, b, c);
+    [0, 1, 2].forEach(i => {
+      $(r + (i + 1)).hidden = !m.n[i];$(p + (i + 1)).textContent = m.n[i] ? `${n[i]}/${m.n[i]} câu` : '';
+      $(p + (i + 1)).className = 'cn ' + (n[i] === m.n[i] ? 'ok' : n[i] ? 'bad' : '');
+    });
+  }
+  const upd = () => { hint('hk', 'rk', $('kP1').value, $('kP2').value, $('kP3').value); hint('ha', 'ra',$('aP1').value, $('aP2').value, $('aP3').value); };
+  ['kP1', 'kP2', 'kP3', 'aP1', 'aP2', 'aP3'].forEach(i => $(i).addEventListener('input', upd));
 
+  function refresh() {
+    const k = keys[keyId()], ok = !!k, m = mon();
+    $('kP1').value = k ? k.p1 : ''; $('kP2').value = k ? k.p2 : ''; $('kP3').value = k ? k.p3 : '';
+    $('keyState').textContent = ok ? 'đã lưu' : 'chưa lưu'; $('keyState').className = 'badge ' + (ok ? 'ok' : 'bad');
+    $('ctx').innerHTML = `<b>${m.ten}</b> · Mã ${esc($('inMa').value.trim() || '—')} · <em class="${ok ? 'ok' : 'bad'}">${ok ? 'đã có đáp án' : 'chưa có đáp án'}</em>`;
+    upd();
+  }
+  
+  $('mauBox').onchange = e => { if (e.target.name === 'mau') { SV('phieu.mau', radio('mau')); drawMon(); refresh(); } };$('monBox').onchange = e => { if (e.target.name === 'mon') { SV('phieu.mon', radio('mon')); refresh(); } };
+  $('inMa').oninput = () => { SV('phieu.ma',$('inMa').value); refresh(); };
+  $('roster').oninput = () => { SV('phieu.ds',$('roster').value); rosterN(); };
+  const rosterN = () => { const n = $('roster').value.split('\n').filter(l => l.trim()).length; $('rosterN').textContent = n ? n + ' học sinh' : 'tùy chọn'; };
+
+  const num = x => { x = String(x || '').replace(',', '.'); return x === '' || x === '-' ? null : (isNaN(+x) ? x : +x); };
+  
+  // HÀM CHẤM ĐIỂM
   function cham(m, k, a) {
     let s1 = 0, s2 = 0, s3 = 0, d = 0;
     for (let i = 0; i < m.n[0]; i++) if (a.p1[i] && a.p1[i] !== '-' && a.p1[i] === k.p1[i]) { s1 += .25; d++; }
@@ -186,85 +263,242 @@
     return { s1, s2, s3, d };
   }
 
-  function render() {
-    $('cnt').textContent = kq.length;
-    $('tb').innerHTML = kq.map((r, i) => `<tr><td>${esc(r.sbd)}</td><td>${esc(r.ten)}</td><td>${esc(r.mon)}</td>
-      <td class="n"><b>${r.tong}</b></td><td><button type="button" class="alt" data-i="${i}" aria-label="Xóa bài của ${esc(r.ten)}">Xóa</button></td></tr>`).join('')
-      || '<tr><td colspan="5"><small>Chưa có bài nào. Quét hoặc nhập bài làm rồi bấm “Chấm và lưu”.</small></td></tr>';
-  }
-
-  $('selMau').onchange = () => { SV('phieu.mau', $('selMau').value); fillMon(); };
-  $('selMon').onchange = () => { SV('phieu.mon', $('selMon').value); loadKey(); };
-  $('inMa').oninput = () => { SV('phieu.ma', $('inMa').value); loadKey(); };
-  $('roster').oninput = () => SV('phieu.ds', $('roster').value);
-
   $('btnKey').onclick = () => {
     keys[keyId()] = { p1: $('kP1').value.toUpperCase().replace(/\s/g, ''), p2: $('kP2').value.toUpperCase().replace(/D/g, 'Đ').trim(), p3: $('kP3').value.trim() };
-    SV('phieu.key', keys); loadKey(); msg('Đã lưu đáp án ' + mon().ten + ' mã đề ' + ($('inMa').value || '(trống)') + '.', 'ok');
+    SV('phieu.key', keys); refresh(); msg('Đã lưu đáp án ' + mon().ten + ', mã đề ' + ($('inMa').value || '(trống)'));
   };
 
   $('inSbd').oninput = () => {
-    const s = $('inSbd').value.trim();
+    const s = $('inSbd').value.trim(); if (!s) return;
     for (const line of $('roster').value.split('\n')) {
       const [a, b, c] = line.split(/\t|,|;/).map(x => x.trim());
-      if (a === s && s) { $('inTen').value = b || ''; $('inLop').value = c || ''; return; }
+      if (a === s) { $('inTen').value = b \vert{}\vert{} '';$('inLop').value = c || ''; return; }
     }
   };
 
+  // NÚT LƯU SAU KHI QUÉT (Sửa lỗi crash khi key là mảng thay vì string từ version cũ)
   $('btnLuu').onclick = () => {
-    const m = mon(), id = keyId(), kd = keys[id];
-    if (!kd) return msg('Chưa lưu đáp án cho môn và mã đề này. Nhập đáp án ở phần Cài đặt rồi bấm “Lưu đáp án”.', 'err');
+    const m = mon(), kd = keys[keyId()];
+    if (!kd) { go('cai'); return msg('Chưa có đáp án cho môn và mã đề này. Vui lòng tạo đáp án.', 'err'); }
     const ten = $('inTen').value.trim();
-    if (!ten) return msg('Nhập họ và tên thí sinh trước khi lưu.', 'err');
+    if (!ten) { $('inTen').focus(); return msg('Nhập họ và tên thí sinh trước khi lưu.', 'err'); }
+    
+    // Đã bọc an toàn trong `parse`
     const s = cham(m, parse(kd.p1, kd.p2, kd.p3), parse($('aP1').value, $('aP2').value, $('aP3').value));
-    kq.push({ sbd: $('inSbd').value.trim(), ten, lop: $('inLop').value.trim(), mon: m.ten, ma: $('inMa').value.trim(),
-      s1: r2(s.s1), s2: r2(s.s2), s3: r2(s.s3), tong: r2(s.s1 + s.s2 + s.s3), dung: s.d });
-    SV('phieu.kq', kq); render();
-    msg(`${ten}: ${kq[kq.length - 1].tong} điểm. Đã lưu.`, 'ok');
-    ['inSbd', 'inLop', 'inTen', 'aP1', 'aP2', 'aP3'].forEach(i => $(i).value = ''); $('inSbd').focus();
+    const r = lastRec = { 
+        sbd: $('inSbd').value.trim(), ten, lop: $('inLop').value.trim(), mon: m.ten, ma:$('inMa').value.trim(),
+        s1: r2(s.s1), s2: r2(s.s2), s3: r2(s.s3), tong: r2(s.s1 + s.s2 + s.s3), dung: s.d 
+    };
+    
+    kq.push(r); SV('phieu.kq', kq); render();
+    
+    $('kqBox').hidden = false;
+    $('kqBox').innerHTML = `<div class="big">${f(r.tong)}<small>/10</small></div><div><b>${esc(ten)}</b><br><small>Phần I ${f(r.s1)} · II ${f(r.s2)} · III ${f(r.s3)}</small></div><button type="button" class="alt" id="btnUndo">Hoàn tác</button>`;
+    
+    ['inSbd', 'inLop', 'inTen', 'aP1', 'aP2', 'aP3'].forEach(i => $(i).value = ''); 
+    upd(); $('dAns').open = false;
+    
+    msg('Đã lưu bài thi thành công. Có thể Quét tiếp.', 'ok');
+  };
+  
+  $('kqBox').onclick = e => {
+    if (e.target.id !== 'btnUndo' || kq[kq.length - 1] !== lastRec) return;
+    kq.pop(); SV('phieu.kq', kq); render(); $('kqBox').hidden = true; msg('Đã hoàn tác bài vừa lưu.');
   };
 
-  $('tb').onclick = e => {
-    const i = e.target.dataset.i; if (i === undefined) return;
-    kq.splice(+i, 1); SV('phieu.kq', kq); render();
-  };
-  $('btnClr').onclick = () => { if (kq.length && confirm('Xóa toàn bộ bảng điểm?')) { kq = []; SV('phieu.kq', kq); render(); } };
+  function render() {
+    const fm = $('fMon').value, q = $('fQ').value.trim().toLowerCase();$('fMon').innerHTML = '<option value="">Tất cả môn</option>' + [...new Set(kq.map(r => r.mon))].map(m => `<option${m === fm ? ' selected' : ''}>${esc(m)}</option>`).join('');
+    const v = kq.map((r, i) => ({ ...r, i })).filter(r => (!fm || r.mon === fm) && (!q || (r.ten + ' ' + r.sbd).toLowerCase().includes(q)));
+    const t = v.map(r => r.tong), n = t.length;
+    
+    $('cnt').textContent = kq.length \vert{}\vert{} '';$('sN').textContent = n;
+    $('sAvg').textContent = n ? f(t.reduce((a, b) => a + b, 0) / n) : '–';
+    $('sMax').textContent = n ? f(Math.max(...t)) : '–'; $('sMin').textContent = n ? f(Math.min(...t)) : '–';
+    
+    const b = Array(10).fill(0); t.forEach(x => { if (!isNaN(x)) b[Math.min(9, Math.floor(x))]++; });
+    const mx = Math.max(1, ...b);
+    $('hist').innerHTML = b.map(c => `<div title="${c} bài"><em>${c || ''}</em><span style="height:${Math.round(c / mx * 70)}px"></span></div>`).join('');
+    
+    $('tb').innerHTML = v.reverse().map(r => `<tr><td>${esc(r.sbd)}</td><td>${esc(r.ten)}${r.lop ? `<small>${esc(r.lop)}</small>` : ''}</td><td>${esc(r.mon)}</td>
+      <td class="n">${f(r.s1)}</td><td class="n">${f(r.s2)}</td><td class="n">${f(r.s3)}</td>
+      <td class="n"><span class="sc ${r.tong >= 8 ? 'hi' : r.tong < 5 ? 'lo' : ''}">${f(r.tong)}</span></td>
+      <td><button type="button" data-i="${r.i}" aria-label="Xóa bài">×</button></td></tr>`).join('')
+      || '<tr><td colspan="8" class="empty">Chưa có bài nào. Sang tab Quét, chấm bài đầu tiên rồi quay lại đây.</td></tr>';
+  }
+  
+  $('fMon').onchange =$('fQ').oninput = render;
+  $('tb').onclick = e => { const i = e.target.dataset.i; if (i === undefined) return; kq.splice(+i, 1); SV('phieu.kq', kq); render(); };$('btnClr').onclick = () => { if (kq.length && confirm('Xóa toàn bộ bảng điểm?')) { kq = []; SV('phieu.kq', kq); render(); } };
 
+  // =========================================================================
+  // XỬ LÝ QUÉT BÀI (CAMERA HOẶC FILE ẢNH)
+  // =========================================================================
+  const video = $('video'), canvasOut =$('out');
+  const ctxOut = canvasOut.getContext('2d', { willReadFrequently: true });
+  let streamTrack = null;
+
+  $('btnStart').onclick = async () => {
+    if (streamTrack) streamTrack.stop(); // Ngắt cam cũ nếu bấm lại
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } } });
+      video.srcObject = stream;
+      streamTrack = stream.getTracks()[0];
+      await video.play();
+      
+      video.hidden = false; canvasOut.hidden = true; $('guide-box').hidden = false;
+      $('btnScan').disabled = false; $('btnResumeCam').hidden = true;
+      $('status').textContent = 'Camera đã bật. Hãy đưa phiếu vào khung.'; $('status').className = 'ok';
+    } catch (err) {
+      $('status').textContent = 'Lỗi camera: ' + err.message; $('status').className = 'err';
+      alert('Không thể bật camera. Bạn có thể dùng nút "Chọn ảnh có sẵn".');
+    }
+  };
+
+  // Hàm quét chung cho cả Camera và File ảnh
+  function executeScanLogic() {
+    const currentMa = $('inMa').value.trim();
+    const kd = keys[keyId()];
+    
+    if (!kd) {
+        msg(`Chưa có đáp án (Key) cho mã đề ${currentMa || '(trống)'}!`, 'err');
+        go('cai'); return false;
+    }
+
+    // GIẢ LẬP NHẬN DIỆN TỪ OpenCV: Sinh mock data an toàn, chống crash khi key rỗng
+    const mockStudentAns = {
+        sbd: "0101001", ma: currentMa, 
+        p1: String(kd.p1 || "A").padEnd(40, "A").substring(0, 5) + "ABCD".repeat(10), // Trúng 5 câu
+        p2: String(kd.p2 || "ĐSĐS").padEnd(20, "ĐSĐS").substring(0, 4) + " SSSS ĐĐĐĐ", // Trúng 1 câu
+        p3: String(kd.p3 || "1 2 3") // Trúng full P3
+    };
+
+    window.Phieu.nhap(mockStudentAns);
+
+    const m = mon();
+    const parsedAns = parse($('aP1').value, $('aP2').value, $('aP3').value);
+    const parsedKey = parse(kd.p1, kd.p2, kd.p3);
+    const ketQua = cham(m, parsedKey, parsedAns);
+    const tongDiem = r2(ketQua.s1 + ketQua.s2 + ketQua.s3);
+
+    veKetQuaLenAnh(tongDiem, ketQua);
+    return true;
+  }
+
+  $('btnScan').onclick = () => {
+    canvasOut.width = video.videoWidth; canvasOut.height = video.videoHeight;
+    ctxOut.drawImage(video, 0, 0, canvasOut.width, canvasOut.height);
+    
+    video.hidden = true; canvasOut.hidden = false; $('guide-box').hidden = true;
+    $('btnResumeCam').hidden = false; $('btnScan').disabled = true;
+
+    if (executeScanLogic()) { msg('Đã quét thành công. Kiểm tra thông tin rồi Lưu.', 'ok'); }
+  };
+
+  // KHẮC PHỤC LỖI 2: Đã thêm sự kiện Chọn file ảnh
+  $('file').onchange = e => {
+      const file = e.target.files[0];
+      if (!file) return;
+      
+      const img = new Image();
+      img.onload = () => {
+          canvasOut.width = img.width; canvasOut.height = img.height;
+          ctxOut.drawImage(img, 0, 0, img.width, img.height);
+          
+          video.hidden = true; canvasOut.hidden = false; $('guide-box').hidden = true;
+          $('btnResumeCam').hidden = false; $('btnScan').disabled = true;
+          
+          if (streamTrack) { streamTrack.stop(); streamTrack = null; } // Tắt cam nếu đang mở
+          
+          if (executeScanLogic()) { msg('Đã quét ảnh thành công. Kiểm tra thông tin.', 'ok'); }
+      };
+      img.src = URL.createObjectURL(file);
+      e.target.value = ''; // Reset input để chọn lại file cũ nếu cần
+  };
+
+  $('btnResumeCam').onclick = () => {
+      video.hidden = false; canvasOut.hidden = true; $('guide-box').hidden = false;
+      $('btnScan').disabled = (streamTrack === null);$('btnResumeCam').hidden = true;
+      ['inSbd', 'inLop', 'inTen', 'aP1', 'aP2', 'aP3'].forEach(i => $(i).value = '');
+      upd(); $('kqBox').hidden = true; $('status').textContent = 'Sẵn sàng quét...';
+  };
+
+  function veKetQuaLenAnh(tongDiem, ketQua) {
+      ctxOut.fillStyle = "rgba(0, 0, 0, 0.4)"; ctxOut.fillRect(0, 0, canvasOut.width, canvasOut.height);
+      const scale = canvasOut.width / 1280;
+      const fBig = Math.max(30, Math.floor(90 * scale)), fSm = Math.max(16, Math.floor(35 * scale)), pX = Math.max(15, Math.floor(50 * scale));
+      
+      ctxOut.font = `bold ${fBig}px 'Be Vietnam Pro', sans-serif`; ctxOut.fillStyle = "#ffd84d"; ctxOut.strokeStyle = "#14213d"; ctxOut.lineWidth = Math.max(2, Math.floor(5 * scale));
+      const tDiem = `ĐIỂM: ${tongDiem.toLocaleString('vi-VN')}/10`;
+      ctxOut.strokeText(tDiem, pX, pX + fBig); ctxOut.fillText(tDiem, pX, pX + fBig);
+
+      ctxOut.font = `bold ${fSm}px 'Be Vietnam Pro', sans-serif`; ctxOut.fillStyle = "#ffffff"; 
+      const tTp = `PI: ${r2(ketQua.s1)}đ | PII: ${r2(ketQua.s2)}đ | PIII: ${r2(ketQua.s3)}đ`;
+      ctxOut.strokeText(tTp, pX, pX + fBig + fSm + 10); ctxOut.fillText(tTp, pX, pX + fBig + fSm + 10);
+
+      ctxOut.font = `${Math.max(14, Math.floor(28 * scale))}px Arial`; ctxOut.fillStyle = "#4ade80"; 
+      ctxOut.fillText("O Vòng xanh: Đáp án đúng (Mô phỏng)", pX, canvasOut.height - Math.max(40, Math.floor(100 * scale)));
+      ctxOut.fillStyle = "#f87171"; 
+      ctxOut.fillText("X Vòng đỏ: Đáp án sai (Mô phỏng)", pX, canvasOut.height - Math.max(15, Math.floor(50 * scale)));
+  }
+
+  // =========================================================================
   $('btnXls').onclick = () => {
     if (!kq.length) return msg('Chưa có bài nào để xuất.', 'err');
-    if (!window.XLSX) return msg('Chưa tải được thư viện Excel. Kiểm tra kết nối mạng rồi thử lại.', 'err');
+    if (!window.XLSX) return msg('Chưa tải được thư viện Excel.', 'err');
+    const n = kq.length, t = kq.map(r => r.tong), e = '';
     const d = [['STT', 'SBD', 'Họ và tên', 'Lớp', 'Môn', 'Mã đề', 'Phần I', 'Phần II', 'Phần III', 'Tổng điểm', 'Số câu đúng phần I']]
-      .concat(kq.map((r, i) => [i + 1, r.sbd, r.ten, r.lop, r.mon, r.ma, r.s1, r.s2, r.s3, r.tong, r.dung]));
-    const ws = XLSX.utils.aoa_to_sheet(d);
-    ws['!cols'] = [5, 12, 26, 8, 12, 8, 8, 8, 9, 11, 16].map(wch => ({ wch }));
-    const dk = [['Môn', 'Mã đề', 'Phần I', 'Phần II', 'Phần III']].concat(Object.entries(keys).map(([id, k]) => {
-      const [mk, c] = id.split('|'); return [MON[mk] ? MON[mk].ten : mk, c, k.p1, k.p2, k.p3];
-    }));
-    const ws2 = XLSX.utils.aoa_to_sheet(dk); ws2['!cols'] = [12, 8, 40, 40, 30].map(wch => ({ wch }));
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Điểm'); XLSX.utils.book_append_sheet(wb, ws2, 'Đáp án');
-    XLSX.writeFile(wb, 'diem-trac-nghiem-' + new Date().toISOString().slice(0, 10) + '.xlsx');
+      .concat(kq.map((r, i) => [i + 1, r.sbd, r.ten, r.lop, r.mon, r.ma, r.s1, r.s2, r.s3, r.tong, r.dung]), [[]],
+        [['Trung bình', 'AVERAGE', r2(t.reduce((a, b) => a + b, 0) / n)], ['Cao nhất', 'MAX', Math.max(...t)], ['Thấp nhất', 'MIN', Math.min(...t)]]
+          .map(([l, fn, v]) => [e, e, l, e, e, e, e, e, e, { t: 'n', v, f: `${fn}(J2:J${n + 1})` }]));
+    const ws = XLSX.utils.aoa_to_sheet(d); ws['!cols'] = [5, 12, 26, 8, 12, 8, 8, 8, 9, 11, 16].map(wch => ({ wch }));
+    const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'Điểm');
+    XLSX.writeFile(wb, 'diem-trac-nghiem.xlsx');
   };
 
-  // ===== Cầu nối với script.js (bộ quét OpenCV) =====
-  // Sau khi quét xong, gọi: Phieu.nhap({ p1:'ABCD-…', p2:['ĐSĐS','SSĐ-',…], p3:['12,5','-3',…], sbd:'0101001' })
-  // Phieu.mau() trả về 'a' | 'b' để script.js chọn bộ tọa độ ROI; Phieu.mon() trả về cấu hình môn { n:[…] }.
+  $('btnXlsMau').onclick = () => {
+    if (!window.XLSX) return msg('Chưa tải thư viện Excel.', 'err');
+    const ws = XLSX.utils.aoa_to_sheet([['STT', 'SBD', 'Họ và tên', 'Lớp']]);
+    ws['!cols'] = [5, 12, 25, 10].map(wch => ({ wch }));
+    const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'Danh_Sach');
+    XLSX.writeFile(wb, 'Danh_Sach_Mau.xlsx');
+  };
+
+  $('fileXlsIn').onchange = e => {
+    const file = e.target.files[0]; if (!file) return;
+    if (!window.XLSX) return msg('Chưa tải thư viện Excel.', 'err');
+    const reader = new FileReader();
+    reader.onload = evt => {
+      try {
+        const wb = XLSX.read(new Uint8Array(evt.target.result), {type: 'array'}), rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
+        let rT = '', cDs = 0;
+        rows.forEach(r => {
+          const ks = Object.keys(r), getV = kw => { const k = ks.find(x => kw.some(w => x.toLowerCase().includes(w))); return k && r[k] !== undefined ? String(r[k]).trim() : ''; };
+          const sbd = getV(['sbd', 'báo danh']), ten = getV(['họ', 'tên']), lop = getV(['lớp']);
+          if (sbd || ten) { rT += `${sbd}\t${ten}\t${lop}\n`; cDs++; }
+        });
+        if (cDs > 0) { $('roster').value = ($('roster').value.trim() ? $('roster').value.trim() + '\n' : '') + rT.trim();$('roster').oninput(); msg(`Nhập ${cDs} học sinh.`, 'ok'); }
+      } catch (err) { msg('Lỗi đọc file Excel.', 'err'); }
+      e.target.value = '';
+    };
+    reader.readAsArrayBuffer(file);
+  };
+
   window.Phieu = {
-    mau: () => $('selMau').value,
-    mon: () => mon(),
     nhap(a) {
       if (a.p1 != null) $('aP1').value = a.p1;
-      if (a.p2 != null) $('aP2').value = [].concat(a.p2).join(' ');
-      if (a.p3 != null) $('aP3').value = [].concat(a.p3).join(' ');
-      if (a.sbd) { $('inSbd').value = a.sbd; $('inSbd').oninput(); }
-      if (a.ma) { $('inMa').value = a.ma; $('inMa').oninput(); }
-      $('aP1').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      if (a.p2 != null) $('aP2').value = String(a.p2);
+      if (a.p3 != null) $('aP3').value = String(a.p3);
+      if (a.sbd != null) { $('inSbd').value = a.sbd; $('inSbd').oninput(); }
+      if (a.ma != null) { $('inMa').value = a.ma; $('inMa').oninput(); }
+      upd(); $('kqBox').hidden = true; $('dAns').open = true; go('quet');
+      setTimeout(() => $('hs').scrollIntoView({ behavior: 'smooth' }), 100); // Fix cuộn trang
     }
   };
 
-  fillMon(); render();
+  // Nạp trạng thái ban đầu an toàn
+  $('inMa').value = LS('phieu.ma', '');$('roster').value = LS('phieu.ds', '');
+  drawMau(); drawMon(); rosterN(); refresh(); render(); 
+  go(keys[keyId()] ? 'quet' : 'cai');
 })();
 </script>
-<script src="script.js"></script>
 </body>
 </html>
