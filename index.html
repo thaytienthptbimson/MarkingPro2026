@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Quét phiếu trắc nghiệm THPT 2026</title>
+<style>
+  :root { --ink:#14213d; --paper:#f6f7f9; --line:#d5d9e0; --ok:#15803d; --bad:#b91c1c; }
+  * { box-sizing:border-box; }
+  body { margin:0; font:16px/1.5 system-ui, sans-serif; background:var(--paper); color:var(--ink);
+         padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom); }
+  main { max-width:640px; margin:0 auto; padding:12px; }
+  h1 { font-size:1.15rem; margin:4px 0 10px; }
+  .cam { position:relative; background:#000; border-radius:8px; overflow:hidden; aspect-ratio:3/4; }
+  video { width:100%; height:100%; object-fit:cover; display:block; }
+  .guide { position:absolute; inset:6%; border:2px dashed rgba(255,255,255,.6); border-radius:6px; pointer-events:none; }
+  .row { display:flex; gap:8px; margin:10px 0; }
+  button, .file { flex:1; padding:12px; border:0; border-radius:8px; background:var(--ink); color:#fff;
+                  font-size:1rem; font-weight:600; text-align:center; cursor:pointer; }
+  button:disabled { opacity:.4; cursor:not-allowed; }
+  .file { background:#fff; color:var(--ink); border:1px solid var(--line); }
+  .file input { display:none; }
+  button:focus-visible, .file:focus-within { outline:3px solid #2563eb; outline-offset:2px; }
+  #status { min-height:1.5em; font-size:.95rem; }
+  #status.err { color:var(--bad); } #status.ok { color:var(--ok); }
+  canvas#out { width:100%; height:auto; border:1px solid var(--line); border-radius:8px; background:#fff; }
+  pre { background:#fff; border:1px solid var(--line); border-radius:8px; padding:10px; overflow-x:auto; font-size:.85rem; white-space:pre-wrap; }
+  small { color:#5b6577; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Quét phiếu trả lời trắc nghiệm THPT 2026</h1>
+
+  <div class="cam">
+    <video id="video" playsinline muted></video>
+    <div class="guide"></div>
+  </div>
+
+  <div class="row">
+    <button id="btnStart">Bật camera</button>
+    <button id="btnScan" disabled>Chụp và chấm</button>
+  </div>
+  <div class="row">
+    <label class="file">Chọn ảnh có sẵn<input id="file" type="file" accept="image/*"></label>
+  </div>
+
+  <div id="status" role="status" aria-live="polite">Đang tải OpenCV.js…</div>
+
+  <!-- Canvas ẩn: khung hình chụp từ video được vẽ vào đây để OpenCV đọc (cv.imread) -->
+  <canvas id="cap" hidden></canvas>
+
+  <!-- Canvas hiển thị phiếu đã nắn phẳng + vòng tròn ROI: dùng để tinh chỉnh tọa độ -->
+  <canvas id="out" hidden></canvas>
+  <pre id="result" hidden></pre>
+  <small>Đặt cả tờ phiếu trong khung nét đứt, nền tối, đủ sáng, giữ máy thẳng. Vòng xanh = ô được nhận là đã tô; vòng đỏ = ô trống.</small>
+</main>
+<script src="script.js"></script>
+</body>
+</html>
