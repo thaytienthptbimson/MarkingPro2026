@@ -11,6 +11,7 @@
          padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom); }
   main { max-width:640px; margin:0 auto; padding:12px; }
   h1 { font-size:1.15rem; margin:4px 0 10px; }
+  h2 { font-size:1rem; margin:0 0 8px; }
   .cam { position:relative; background:#000; border-radius:8px; overflow:hidden; aspect-ratio:3/4; }
   video { width:100%; height:100%; object-fit:cover; display:block; }
   .guide { position:absolute; inset:6%; border:2px dashed rgba(255,255,255,.6); border-radius:6px; pointer-events:none; }
@@ -18,19 +19,53 @@
   button, .file { flex:1; padding:12px; border:0; border-radius:8px; background:var(--ink); color:#fff;
                   font-size:1rem; font-weight:600; text-align:center; cursor:pointer; }
   button:disabled { opacity:.4; cursor:not-allowed; }
-  .file { background:#fff; color:var(--ink); border:1px solid var(--line); }
+  button.alt, .file { background:#fff; color:var(--ink); border:1px solid var(--line); }
   .file input { display:none; }
-  button:focus-visible, .file:focus-within { outline:3px solid #2563eb; outline-offset:2px; }
-  #status { min-height:1.5em; font-size:.95rem; }
-  #status.err { color:var(--bad); } #status.ok { color:var(--ok); }
+  button:focus-visible, .file:focus-within, input:focus-visible, select:focus-visible, textarea:focus-visible, summary:focus-visible { outline:3px solid #2563eb; outline-offset:2px; }
+  #status, #msg { min-height:1.5em; font-size:.95rem; }
+  #status.err, #msg.err { color:var(--bad); } #status.ok, #msg.ok { color:var(--ok); }
   canvas#out { width:100%; height:auto; border:1px solid var(--line); border-radius:8px; background:#fff; }
   pre { background:#fff; border:1px solid var(--line); border-radius:8px; padding:10px; overflow-x:auto; font-size:.85rem; white-space:pre-wrap; }
   small { color:#5b6577; }
+  .panel { background:#fff; border:1px solid var(--line); border-radius:8px; padding:12px; margin:0 0 12px; }
+  .g { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  .g .w { grid-column:1/-1; }
+  label { display:block; font-size:.85rem; color:#5b6577; }
+  input, select, textarea { display:block; width:100%; margin-top:2px; padding:10px; font:inherit; color:var(--ink);
+                            background:#fff; border:1px solid var(--line); border-radius:8px; }
+  textarea { min-height:90px; }
+  details { margin-top:10px; } summary { cursor:pointer; font-weight:600; }
+  .tw { overflow-x:auto; } table { width:100%; border-collapse:collapse; font-size:.9rem; }
+  th, td { padding:6px 8px; border-bottom:1px solid var(--line); text-align:left; white-space:nowrap; }
+  td.n, th.n { text-align:right; } td button { padding:4px 8px; font-size:.85rem; flex:none; }
 </style>
 </head>
 <body>
 <main>
   <h1>Quét phiếu trả lời trắc nghiệm THPT 2026</h1>
+
+  <section class="panel" aria-label="Cài đặt bài chấm">
+    <h2>Cài đặt bài chấm</h2>
+    <div class="g">
+      <label class="w">Mẫu phiếu <select id="selMau"></select></label>
+      <label>Môn thi <select id="selMon"></select></label>
+      <label>Mã đề <input id="inMa" placeholder="vd: 101" autocomplete="off"></label>
+    </div>
+    <details id="keyBox" open>
+      <summary>Đáp án đúng: <span id="keyState">chưa nhập</span></summary>
+      <div class="g">
+        <label class="w">Phần I (không cách, vd: ABCD…) <input id="kP1" autocomplete="off"></label>
+        <label class="w">Phần II (4 ký tự Đ/S mỗi câu, cách nhau, vd: ĐSĐS SSĐĐ) <input id="kP2" autocomplete="off"></label>
+        <label class="w">Phần III (cách nhau, vd: 12,5 -3 0,75) <input id="kP3" autocomplete="off"></label>
+      </div>
+      <div class="row"><button id="btnKey" type="button">Lưu đáp án</button></div>
+    </details>
+    <details>
+      <summary>Danh sách lớp (tự điền họ tên theo SBD)</summary>
+      <label>Mỗi dòng một học sinh: SBD, Họ và tên, Lớp (ngăn bằng tab hoặc dấu phẩy)
+        <textarea id="roster" placeholder="0101001, Nguyễn Văn An, 12A1"></textarea></label>
+    </details>
+  </section>
 
   <div class="cam">
     <video id="video" playsinline muted></video>
@@ -54,7 +89,182 @@
   <canvas id="out" hidden></canvas>
   <pre id="result" hidden></pre>
   <small>Đặt cả tờ phiếu trong khung nét đứt, nền tối, đủ sáng, giữ máy thẳng. Vòng xanh = ô được nhận là đã tô; vòng đỏ = ô trống.</small>
+
+  <section class="panel" style="margin-top:12px" aria-label="Thí sinh và bài làm">
+    <h2>Thí sinh và bài làm</h2>
+    <div class="g">
+      <label>SBD <input id="inSbd" autocomplete="off"></label>
+      <label>Lớp <input id="inLop" autocomplete="off"></label>
+      <label class="w">Họ và tên <input id="inTen" autocomplete="off"></label>
+      <label class="w">Phần I đã quét <input id="aP1" autocomplete="off"></label>
+      <label class="w">Phần II đã quét <input id="aP2" autocomplete="off"></label>
+      <label class="w">Phần III đã quét <input id="aP3" autocomplete="off"></label>
+    </div>
+    <small>Dùng “-” cho câu bỏ trống. Có thể sửa kết quả quét hoặc nhập tay trước khi chấm.</small>
+    <div class="row"><button id="btnLuu" type="button">Chấm và lưu</button></div>
+    <div id="msg" role="status" aria-live="polite"></div>
+  </section>
+
+  <section class="panel" aria-label="Bảng điểm">
+    <h2>Bảng điểm (<span id="cnt">0</span> bài)</h2>
+    <div class="tw"><table>
+      <thead><tr><th>SBD</th><th>Họ và tên</th><th>Môn</th><th class="n">Điểm</th><th></th></tr></thead>
+      <tbody id="tb"></tbody>
+    </table></div>
+    <div class="row">
+      <button id="btnXls" type="button">Xuất Excel</button>
+      <button id="btnClr" type="button" class="alt">Xóa bảng điểm</button>
+    </div>
+  </section>
 </main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const LS = (k, d) => { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } };
+  const SV = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} };
+  const esc = s => String(s).replace(/[&<>"]/g, c => '&#' + c.charCodeAt(0) + ';');
+
+  // ===== CẤU HÌNH: sửa tại đây cho khớp phiếu và cấu trúc đề thực tế =====
+  // ph: số phần có trên phiếu. n: [số câu phần I, II, III]. p3: điểm mỗi câu phần III. Phần I: 0,25 điểm/câu.
+  const MAU = {
+    a: { ten: 'THPT 2026 – 3 phần (I, II, III)', ph: 3 },
+    b: { ten: 'Chỉ phần I – một lựa chọn A–D', ph: 1 }
+  };
+  const MON = {
+    toan: { ten: 'Toán', n: [12, 4, 6], p3: .5 },
+    ly:   { ten: 'Vật lí', n: [18, 4, 6], p3: .25 },
+    hoa:  { ten: 'Hóa học', n: [18, 4, 6], p3: .25 },
+    sinh: { ten: 'Sinh học', n: [18, 4, 6], p3: .25 },
+    dia:  { ten: 'Địa lí', n: [18, 4, 6], p3: .25 },
+    su:   { ten: 'Lịch sử', n: [24, 4, 0], p3: 0 },
+    nn:   { ten: 'Ngoại ngữ', n: [40, 0, 0], p3: 0 }
+  };
+  const P2 = [0, .1, .25, .5, 1]; // điểm phần II theo số ý đúng trong câu
+  // =====================================================================
+
+  let keys = LS('phieu.key', {}), kq = LS('phieu.kq', []);
+  const mon = () => MON[$('selMon').value];
+  const keyId = () => $('selMon').value + '|' + $('inMa').value.trim();
+  const r2 = x => Math.round(x * 100) / 100;
+  const msg = (t, c) => { $('msg').textContent = t; $('msg').className = c || ''; };
+
+  $('selMau').innerHTML = Object.entries(MAU).map(([k, m]) => `<option value="${k}">${m.ten}</option>`).join('');
+  $('selMau').value = LS('phieu.mau', 'a'); $('inMa').value = LS('phieu.ma', '');
+  $('roster').value = LS('phieu.ds', '');
+
+  function fillMon() {
+    const ph = MAU[$('selMau').value].ph, cur = LS('phieu.mon', 'toan');
+    $('selMon').innerHTML = Object.entries(MON).filter(([, m]) => ph === 3 || m.n[1] + m.n[2] === 0)
+      .map(([k, m]) => `<option value="${k}">${m.ten}</option>`).join('');
+    if ([...$('selMon').options].some(o => o.value === cur)) $('selMon').value = cur;
+    loadKey();
+  }
+  function loadKey() {
+    const k = keys[keyId()] || { p1: '', p2: '', p3: '' };
+    $('kP1').value = k.p1; $('kP2').value = k.p2; $('kP3').value = k.p3;
+    $('keyState').textContent = keys[keyId()] ? 'đã lưu' : 'chưa nhập';
+  }
+
+  const parse = (a, b, c) => ({
+    p1: a.toUpperCase().replace(/\s/g, ''),
+    p2: b.toUpperCase().replace(/D/g, 'Đ').split(/[\s,;|]+/),
+    p3: c.trim().split(/[\s;|]+/)
+  });
+  const num = x => { x = (x || '').replace(',', '.'); return x === '' || x === '-' ? null : (isNaN(+x) ? x : +x); };
+
+  function cham(m, k, a) {
+    let s1 = 0, s2 = 0, s3 = 0, d = 0;
+    for (let i = 0; i < m.n[0]; i++) if (a.p1[i] && a.p1[i] !== '-' && a.p1[i] === k.p1[i]) { s1 += .25; d++; }
+    for (let j = 0; j < m.n[1]; j++) {
+      let c = 0;
+      for (let t = 0; t < 4; t++) { const x = (a.p2[j] || '')[t]; if (x && x !== '-' && x === (k.p2[j] || '')[t]) c++; }
+      s2 += P2[c];
+    }
+    for (let l = 0; l < m.n[2]; l++) { const x = num(a.p3[l]); if (x !== null && x === num(k.p3[l])) s3 += m.p3; }
+    return { s1, s2, s3, d };
+  }
+
+  function render() {
+    $('cnt').textContent = kq.length;
+    $('tb').innerHTML = kq.map((r, i) => `<tr><td>${esc(r.sbd)}</td><td>${esc(r.ten)}</td><td>${esc(r.mon)}</td>
+      <td class="n"><b>${r.tong}</b></td><td><button type="button" class="alt" data-i="${i}" aria-label="Xóa bài của ${esc(r.ten)}">Xóa</button></td></tr>`).join('')
+      || '<tr><td colspan="5"><small>Chưa có bài nào. Quét hoặc nhập bài làm rồi bấm “Chấm và lưu”.</small></td></tr>';
+  }
+
+  $('selMau').onchange = () => { SV('phieu.mau', $('selMau').value); fillMon(); };
+  $('selMon').onchange = () => { SV('phieu.mon', $('selMon').value); loadKey(); };
+  $('inMa').oninput = () => { SV('phieu.ma', $('inMa').value); loadKey(); };
+  $('roster').oninput = () => SV('phieu.ds', $('roster').value);
+
+  $('btnKey').onclick = () => {
+    keys[keyId()] = { p1: $('kP1').value.toUpperCase().replace(/\s/g, ''), p2: $('kP2').value.toUpperCase().replace(/D/g, 'Đ').trim(), p3: $('kP3').value.trim() };
+    SV('phieu.key', keys); loadKey(); msg('Đã lưu đáp án ' + mon().ten + ' mã đề ' + ($('inMa').value || '(trống)') + '.', 'ok');
+  };
+
+  $('inSbd').oninput = () => {
+    const s = $('inSbd').value.trim();
+    for (const line of $('roster').value.split('\n')) {
+      const [a, b, c] = line.split(/\t|,|;/).map(x => x.trim());
+      if (a === s && s) { $('inTen').value = b || ''; $('inLop').value = c || ''; return; }
+    }
+  };
+
+  $('btnLuu').onclick = () => {
+    const m = mon(), id = keyId(), kd = keys[id];
+    if (!kd) return msg('Chưa lưu đáp án cho môn và mã đề này. Nhập đáp án ở phần Cài đặt rồi bấm “Lưu đáp án”.', 'err');
+    const ten = $('inTen').value.trim();
+    if (!ten) return msg('Nhập họ và tên thí sinh trước khi lưu.', 'err');
+    const s = cham(m, parse(kd.p1, kd.p2, kd.p3), parse($('aP1').value, $('aP2').value, $('aP3').value));
+    kq.push({ sbd: $('inSbd').value.trim(), ten, lop: $('inLop').value.trim(), mon: m.ten, ma: $('inMa').value.trim(),
+      s1: r2(s.s1), s2: r2(s.s2), s3: r2(s.s3), tong: r2(s.s1 + s.s2 + s.s3), dung: s.d });
+    SV('phieu.kq', kq); render();
+    msg(`${ten}: ${kq[kq.length - 1].tong} điểm. Đã lưu.`, 'ok');
+    ['inSbd', 'inLop', 'inTen', 'aP1', 'aP2', 'aP3'].forEach(i => $(i).value = ''); $('inSbd').focus();
+  };
+
+  $('tb').onclick = e => {
+    const i = e.target.dataset.i; if (i === undefined) return;
+    kq.splice(+i, 1); SV('phieu.kq', kq); render();
+  };
+  $('btnClr').onclick = () => { if (kq.length && confirm('Xóa toàn bộ bảng điểm?')) { kq = []; SV('phieu.kq', kq); render(); } };
+
+  $('btnXls').onclick = () => {
+    if (!kq.length) return msg('Chưa có bài nào để xuất.', 'err');
+    if (!window.XLSX) return msg('Chưa tải được thư viện Excel. Kiểm tra kết nối mạng rồi thử lại.', 'err');
+    const d = [['STT', 'SBD', 'Họ và tên', 'Lớp', 'Môn', 'Mã đề', 'Phần I', 'Phần II', 'Phần III', 'Tổng điểm', 'Số câu đúng phần I']]
+      .concat(kq.map((r, i) => [i + 1, r.sbd, r.ten, r.lop, r.mon, r.ma, r.s1, r.s2, r.s3, r.tong, r.dung]));
+    const ws = XLSX.utils.aoa_to_sheet(d);
+    ws['!cols'] = [5, 12, 26, 8, 12, 8, 8, 8, 9, 11, 16].map(wch => ({ wch }));
+    const dk = [['Môn', 'Mã đề', 'Phần I', 'Phần II', 'Phần III']].concat(Object.entries(keys).map(([id, k]) => {
+      const [mk, c] = id.split('|'); return [MON[mk] ? MON[mk].ten : mk, c, k.p1, k.p2, k.p3];
+    }));
+    const ws2 = XLSX.utils.aoa_to_sheet(dk); ws2['!cols'] = [12, 8, 40, 40, 30].map(wch => ({ wch }));
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Điểm'); XLSX.utils.book_append_sheet(wb, ws2, 'Đáp án');
+    XLSX.writeFile(wb, 'diem-trac-nghiem-' + new Date().toISOString().slice(0, 10) + '.xlsx');
+  };
+
+  // ===== Cầu nối với script.js (bộ quét OpenCV) =====
+  // Sau khi quét xong, gọi: Phieu.nhap({ p1:'ABCD-…', p2:['ĐSĐS','SSĐ-',…], p3:['12,5','-3',…], sbd:'0101001' })
+  // Phieu.mau() trả về 'a' | 'b' để script.js chọn bộ tọa độ ROI; Phieu.mon() trả về cấu hình môn { n:[…] }.
+  window.Phieu = {
+    mau: () => $('selMau').value,
+    mon: () => mon(),
+    nhap(a) {
+      if (a.p1 != null) $('aP1').value = a.p1;
+      if (a.p2 != null) $('aP2').value = [].concat(a.p2).join(' ');
+      if (a.p3 != null) $('aP3').value = [].concat(a.p3).join(' ');
+      if (a.sbd) { $('inSbd').value = a.sbd; $('inSbd').oninput(); }
+      if (a.ma) { $('inMa').value = a.ma; $('inMa').oninput(); }
+      $('aP1').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  };
+
+  fillMon(); render();
+})();
+</script>
 <script src="script.js"></script>
 </body>
 </html>
